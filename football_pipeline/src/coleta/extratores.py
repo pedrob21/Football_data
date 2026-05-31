@@ -57,7 +57,7 @@ def coletar_artilheiros(codigo, temporada):
 
     dados = fazer_requisicao(endpoint_scorers)
 
-    tipo_dado = "standings"
+    tipo_dado = "scorers"
     destino = f"data/raw/{tipo_dado}"
     os.makedirs(destino, exist_ok=True)
 

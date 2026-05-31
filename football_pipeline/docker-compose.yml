@@ -1,0 +1,46 @@
+services:
+
+  postgres:
+    image: postgres:15-alpine
+    
+    container_name: container_postgres_app
+    
+    ports:
+      - "${DB_PORT}:5432"
+    
+    # 6. Variáveis de ambiente que o PostgreSQL precisa para iniciar
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      
+    # 7. Volumes (Garante que os dados do banco não sumam ao desligar o contêiner)
+    volumes:
+      - dados_do_postgres:/var/lib/postgresql/data
+
+    healthcheck:
+      # Roda o comando nativo do Postgres para ver se ele está aceitando conexões
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s     # De quanto em quanto tempo faz o teste
+      timeout: 5s      # Tempo máximo esperando a resposta
+      retries: 5
+
+  app:
+    build: .
+    container_name: app_container
+    
+    env_file:
+      - .env
+    environment:
+      DB_HOST: postgres
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+    
+    volumes:
+      - .:/app
+
+# 8. Declaração do volume que criamos ali em cima
+volumes:
+  dados_do_postgres:
